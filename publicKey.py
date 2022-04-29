@@ -13,6 +13,11 @@ BIP32_CURVE = SECP256k1
 BIP32_SEED_MODIFIER = b'Bitcoin seed'
 ETH_DERIVATION_PATH = "m/44'/60'/0'/0"
 
+MNEMONIC_LENGTH_MAP = {12: 128, 15: 160, 18: 192, 21: 224, 24: 256}
+# 设置助记词长度
+mnemonic_length = MNEMONIC_LENGTH_MAP[15]
+mnemonic_service = Mnemonic("english")
+
 
 class PublicKey:
     def __init__(self, private_key):
@@ -37,7 +42,6 @@ def mnemonic_to_bip39seed(mnemonic, passphrase):
 
 
 def bip39seed_to_bip32masternode(seed):
-    k = seed
     h = hmac.new(BIP32_SEED_MODIFIER, seed, hashlib.sha512).digest()
     key, chain_code = h[:32], h[32:]
     return key, chain_code
@@ -87,7 +91,7 @@ def mnemonic_to_private_key(mnemonic, str_derivation_path, passphrase=""):
     return private_key
 
 
-def get_address_key(mnemonic: str, index:str):
+def get_address_key(mnemonic: str, index: int):
     private_key = mnemonic_to_private_key(mnemonic, str_derivation_path=f'{ETH_DERIVATION_PATH}/{index}')
     public_key = PublicKey(private_key)
     private_key_str = binascii.hexlify(private_key).decode("utf-8")
@@ -96,45 +100,39 @@ def get_address_key(mnemonic: str, index:str):
     return [private_key_str, public_key_str, address]
 
 
-mnemo = Mnemonic("english")
-
-
-def gen_multi_mnemonic(count):
+def gen_multi_mnemonic(mnemonic_count):
     all_wallet = []
-    for i in range(0, count):
+    for i in range(0, mnemonic_count):
         wallet_account = {}
-        mnemonic = mnemo.generate(strength=256)
-        res = get_address_key(mnemonic, 0)
+        mnemonic = mnemonic_service.generate(strength=mnemonic_length)
+        ret = get_address_key(mnemonic, 0)
         wallet_account["id"] = i
         wallet_account["助记词"] = mnemonic
-        wallet_account["私钥"] = res[0]
-        wallet_account["公钥"] = res[1]
-        wallet_account["地址"] = res[2]
+        wallet_account["私钥"] = ret[0]
+        wallet_account["公钥"] = ret[1]
+        wallet_account["地址"] = ret[2]
         all_wallet.append(wallet_account)
     return all_wallet
 
 
-def get_by_single_mnemonic(count):
-    mnemonic = mnemo.generate(strength=256)
+def get_by_single_mnemonic(mnemonic_count):
+    mnemonic = mnemonic_service.generate(strength=mnemonic_length)
     all_wallet = {"助记词": mnemonic, "钱包": []}
-    for i in range(0, count):
+    for i in range(0, mnemonic_count):
         wallet_account = {}
-        # passphrase = str(i)
-        res = get_address_key(mnemonic, i)
+        ret = get_address_key(mnemonic, i)
         wallet_account["id"] = i
-        wallet_account["私钥"] = res[0]
-        wallet_account["公钥"] = res[1]
-        wallet_account["地址"] = res[2]
-        # wallet_account["密码"] = passphrase
+        wallet_account["私钥"] = ret[0]
+        wallet_account["公钥"] = ret[1]
+        wallet_account["地址"] = ret[2]
         all_wallet["钱包"].append(wallet_account)
     return all_wallet
-
 
 
 if __name__ == '__main__':
     import sys
 
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print(f"# 未找到 输入参数 【生成数量】【生成模式】")
         print(f"# 未找到 生成数量和生成模式 参数： {sys.argv[0]} [生成数量] [模式 1:按随机助记词 2：按固定助记词] ")
         print(f"# 举个栗子1: 生成10个地址 固定助记词: {sys.argv[0]} 10  1 ")
@@ -145,14 +143,18 @@ if __name__ == '__main__':
     mode = int(sys.argv[2])
     file_prefix = {1: "随机助记词", 2: "固定助记词"}
     if mode == 1:
-        res = gen_multi_mnemonic(count)
+        ret = gen_multi_mnemonic(count)
     elif mode == 2:
-        res = get_by_single_mnemonic(count)
+        ret = get_by_single_mnemonic(count)
     else:
-        print("输入的生成模式不正确")
+        print(f"输入的参数不正确 {sys.argv}")
+        print(f"# 未找到 输入参数 【生成数量】【生成模式】")
+        print(f"# 未找到 生成数量和生成模式 参数： {sys.argv[0]} [生成数量] [模式 1:按随机助记词 2：按固定助记词] ")
+        print(f"# 举个栗子1: 生成10个地址 固定助记词: {sys.argv[0]} 10  1 ")
+        print(f"# 举个栗子2: 生成10个地址 随机助记词 : {sys.argv[0]} 10  2 ")
         exit()
 
     filename = f"{file_prefix[mode]}_{count}个地址_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".json"
     with open(filename, mode='w', encoding='utf-8') as f:
-        json.dump(res, f, ensure_ascii=False, indent=4)
+        json.dump(ret, f, ensure_ascii=False, indent=4)
     print(f"生成文件: {filename}")

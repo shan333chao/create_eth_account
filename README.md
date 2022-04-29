@@ -1,18 +1,18 @@
-# create_eth_account
-create mnemonic privatekey publickey address 
+# 批量eth创建钱包地址助记词 create_eth_account 
+
+create batch mnemonic privatekey publickey address 
+
 批量创建 eth  助记词 公钥，私钥 钱包地址
 
-先安装依赖  
+1.先安装依赖  
 
-      pip3 install -r requirement.txt
+    pip3 install -r requirement.txt
 
+用法: 
 
+    python3 publicKey.py [数量] [模式]  
 
-用法: python3 publicKey.py [数量] [模式]  
-
-
-模式1  生成随机助记词 2
-
+模式1：使用随机助记词生成2个钱包地址
 
     python3.x publicKey.py 2 1
     
@@ -36,9 +36,7 @@ create mnemonic privatekey publickey address
 
 
 
-模式2 生成固定助记词2个
-
-
+模式2：使用固定助记词生成2个钱包地址 
       python3.x publicKey.py 100 2
       
       {
