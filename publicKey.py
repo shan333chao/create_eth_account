@@ -87,7 +87,7 @@ def mnemonic_to_private_key(mnemonic, str_derivation_path, passphrase=""):
     return private_key
 
 
-def get_address_key(mnemonic: str, index:str):
+def get_address_key(mnemonic: str, index: str):
     private_key = mnemonic_to_private_key(mnemonic, str_derivation_path=f'{ETH_DERIVATION_PATH}/{index}')
     public_key = PublicKey(private_key)
     private_key_str = binascii.hexlify(private_key).decode("utf-8")
@@ -96,14 +96,14 @@ def get_address_key(mnemonic: str, index:str):
     return [private_key_str, public_key_str, address]
 
 
-mnemo = Mnemonic("english")
+mnemonic_service = Mnemonic("english")
 
 
 def gen_multi_mnemonic(count):
     all_wallet = []
     for i in range(0, count):
         wallet_account = {}
-        mnemonic = mnemo.generate(strength=256)
+        mnemonic = mnemonic_service.generate(strength=256)
         res = get_address_key(mnemonic, 0)
         wallet_account["id"] = i
         wallet_account["助记词"] = mnemonic
@@ -115,11 +115,10 @@ def gen_multi_mnemonic(count):
 
 
 def get_by_single_mnemonic(count):
-    mnemonic = mnemo.generate(strength=256)
+    mnemonic = mnemonic_service.generate(strength=256)
     all_wallet = {"助记词": mnemonic, "钱包": []}
     for i in range(0, count):
         wallet_account = {}
-        # passphrase = str(i)
         res = get_address_key(mnemonic, i)
         wallet_account["id"] = i
         wallet_account["私钥"] = res[0]
@@ -128,7 +127,6 @@ def get_by_single_mnemonic(count):
         # wallet_account["密码"] = passphrase
         all_wallet["钱包"].append(wallet_account)
     return all_wallet
-
 
 
 if __name__ == '__main__':
@@ -145,14 +143,14 @@ if __name__ == '__main__':
     mode = int(sys.argv[2])
     file_prefix = {1: "随机助记词", 2: "固定助记词"}
     if mode == 1:
-        res = gen_multi_mnemonic(count)
+        ret = gen_multi_mnemonic(count)
     elif mode == 2:
-        res = get_by_single_mnemonic(count)
+        ret = get_by_single_mnemonic(count)
     else:
         print("输入的生成模式不正确")
         exit()
 
     filename = f"{file_prefix[mode]}_{count}个地址_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".json"
     with open(filename, mode='w', encoding='utf-8') as f:
-        json.dump(res, f, ensure_ascii=False, indent=4)
+        json.dump(ret, f, ensure_ascii=False, indent=4)
     print(f"生成文件: {filename}")

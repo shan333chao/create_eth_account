@@ -1,3 +1,4 @@
 web3~=5.29.0
 ecdsa~=0.17.0
 mnemonic~=0.20
+eth_utils
