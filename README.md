@@ -1,10 +1,10 @@
-# 批量eth创建钱包地址助记词 create_eth_account 
+# 批量ETH创建钱包地址助记词 batch create eth wallet
 
-create batch mnemonic privatekey publickey address 
+Batch eth helper creation public key, private key wallet address
 
 批量创建 eth  助记词 公钥，私钥 钱包地址
 
-1.先安装依赖  
+1、先安装依赖  
 
     pip3 install -r requirement.txt
 
@@ -12,10 +12,13 @@ create batch mnemonic privatekey publickey address
 
     python3 publicKey.py [数量] [模式]  
 
-模式1：使用随机助记词生成2个钱包地址
+2、模式一：使用随机助记词生成2个钱包地址
 
     python3.x publicKey.py 2 1
-    
+
+生成： 随机助记词_2个地址_年-月-日_时-分-秒.json   文件
+
+    文件内容
     [
         {
             "id": 0,
@@ -36,10 +39,14 @@ create batch mnemonic privatekey publickey address
 
 
 
-模式2：使用固定助记词生成2个钱包地址 
+3、模式二：使用固定助记词生成2个钱包地址 
+
       python3.x publicKey.py 100 2
       
-      {
+生成： 固定助记词_2个地址_年-月-日_时-分-秒.json   文件
+     
+    文件内容
+     {
           "助记词": "guitar shock advance invite danger raw start fuel verify clean illegal hammer term claw indoor learn fuel draft inherit sort stay flee trigger arm",
           "钱包": [
               {
